@@ -1,9 +1,3 @@
-from pathlib import Path
-
-# Definitieve en opgeschoonde versie van de code
-code = '''# Chickkies Veldslag App
-# Volledige vernieuwde versie op basis van originele opdrachtenlijst en logica
-
 import streamlit as st
 import time
 
@@ -34,18 +28,18 @@ adressen = [
 
 vraag_data = {
     "A1": {"type": "opdracht", "tekst": "Maak een katapult van elastiek en lepels en schiet een marshmallow.", "codewoord": "kelk"},
-    "A2": {"type": "vraag", "tekst": "Wat was de taak van een hofnar?\\nA) De koning verdedigen\\nB) Grappen maken en de koning vermaken\\nC) Het kasteel schoonmaken", "antwoord": "B"},
+    "A2": {"type": "vraag", "tekst": "Wat was de taak van een hofnar?\nA) De koning verdedigen\nB) Grappen maken en de koning vermaken\nC) Het kasteel schoonmaken", "antwoord": "B"},
     "A3": {"type": "opdracht", "tekst": "Vorm samen een menselijk schild.", "codewoord": "rondetafel"},
     "A4": {"type": "opdracht", "tekst": "Verzin een monster dat jullie onderweg tegenkomen en beschrijf hoe jullie het verslaan.", "codewoord": "Draak"},
     "A5": {"type": "opdracht", "tekst": "Spreek 1 minuut als een dronken nar.", "codewoord": "Jeanne"},
     "A6": {"type": "opdracht", "tekst": "Doe een zwaardgevecht met onzichtbare wapens in slow motion.", "codewoord": "Prinseserwt"},
-    "B1": {"type": "vraag", "tekst": "Wat was de functie van een donjon in een kasteel?\\nA) Wijnkelder\\nB) Hoofdtoren/verdediging\\nC) Feestzaal", "antwoord": "B"},
+    "B1": {"type": "vraag", "tekst": "Wat was de functie van een donjon in een kasteel?\nA) Wijnkelder\nB) Hoofdtoren/verdediging\nC) Feestzaal", "antwoord": "B"},
     "B2": {"type": "opdracht", "tekst": "Maak een vlag voor jouw team.", "codewoord": "Joris"},
     "B3": {"type": "vraag", "tekst": "Wat droeg een ridder als bescherming (6 letters)?", "antwoord": "harnas"},
     "B4": {"type": "opdracht", "tekst": "Als jij koning(in) was, wat zou je eerste wet zijn? Deze wet moet je team het hele weekend volgen.", "codewoord": "hofnar"},
     "B5": {"type": "consequentie", "tekst": "Je loopt in een hinderlaag van de tegenpartij.", "wacht": 120},
     "B6": {"type": "opdracht", "tekst": "Voer een middeleeuwse ridderceremonie uit en sla iemand tot ridder met een tak.", "codewoord": "hekserij"},
-    "C1": {"type": "vraag", "tekst": "Wat is een banier?\\nA) Een paard\\nB) Een strijdkreet\\nC) Een vlag met een symbool van een ridder of familie", "antwoord": "C"},
+    "C1": {"type": "vraag", "tekst": "Wat is een banier?\nA) Een paard\nB) Een strijdkreet\nC) Een vlag met een symbool van een ridder of familie", "antwoord": "C"},
     "C2": {"type": "opdracht", "tekst": "Vertel in 20 seconden het verhaal van je eerste drakengevecht.", "codewoord": ""},
     "C3": {"type": "consequentie", "tekst": "De rivier is te diep – je loopt 2 minuten vertraging op.", "wacht": 120},
     "C4": {"type": "opdracht", "tekst": "Voer een zwaardgevecht met dropveters in slow motion.", "codewoord": "slot"},
@@ -55,12 +49,12 @@ vraag_data = {
     "D2": {"type": "consequentie", "tekst": "Je moet je terugtrekken – je mag gedurende twee minuten geen nieuwe locatie aanvallen.", "wacht": 120},
     "D3": {"type": "vraag", "tekst": "Lang steekwapen, vaak gebruikt op paarden (4 letters)", "antwoord": "lans"},
     "D4": {"type": "consequentie", "tekst": "Je hebt het rantsoen van de tegenpartij gevonden – ga direct door.", "wacht": 0},
-    "D5": {"type": "vraag", "tekst": "Wat was een heraut?\\nA) Een kok\\nB) Een boodschapper die aankondigingen deed\\nC) Een soldaat", "antwoord": "B"},
+    "D5": {"type": "vraag", "tekst": "Wat was een heraut?\nA) Een kok\nB) Een boodschapper die aankondigingen deed\nC) Een soldaat", "antwoord": "B"},
     "D6": {"type": "opdracht", "tekst": "Maak een schild.", "codewoord": "prins"},
     "E1": {"type": "opdracht", "tekst": "Kruip 15 meter over het gras alsof je gewond bent in de strijd.", "codewoord": "pijlenboog"},
-    "E2": {"type": "vraag", "tekst": "Wat is een pelgrim?\\nA) Iemand die op reis ging om religieuze redenen\\nB) Een roofridder\\nC) Een koopman met kamelen", "antwoord": "A"},
+    "E2": {"type": "vraag", "tekst": "Wat is een pelgrim?\nA) Iemand die op reis ging om religieuze redenen\nB) Een roofridder\nC) Een koopman met kamelen", "antwoord": "A"},
     "E3": {"type": "vraag", "tekst": "Vuurspuwend wezen in veel sagen (5 letters)", "antwoord": "draak"},
-    "E4": {"type": "vraag", "tekst": "Welke taal werd vaak gebruikt in officiële documenten in de middeleeuwen?\\nA) Frans\\nB) Nederlands\\nC) Latijn", "antwoord": "C"},
+    "E4": {"type": "vraag", "tekst": "Welke taal werd vaak gebruikt in officiële documenten in de middeleeuwen?\nA) Frans\nB) Nederlands\nC) Latijn", "antwoord": "C"},
     "E5": {"type": "opdracht", "tekst": "Verzin een middeleeuwse bijnaam voor al je groepsleden.", "codewoord": "schild"},
     "E6": {"type": "opdracht", "tekst": "Maak een helm van aluminiumfolie.", "codewoord": "veldslag"},
     "F1": {"type": "consequentie", "tekst": "Je wapens zijn verdwenen; gebruik bij de volgende opdracht alleen je linkerhand.", "wacht": 0},
@@ -139,14 +133,3 @@ if vak:
 
 st.markdown("---")
 st.markdown(f"### 📍 Gevonden vakken: {', '.join(st.session_state.gevonden_vakken)}")
-st.markdown(f"### ⚔️ Troepenmachten uitgeschakeld: {len(st.session_state.gevonden_troepen)}")
-st.markdown(f"### 🗺️ Ontvangen hints:")
-for i, adres in enumerate(st.session_state.gegeven_adressen):
-    st.write(f"{i+1}. {adres}")
-'''
-
-# Bestand opslaan
-bestand = Path("/mnt/data/veldslag_app.py")
-bestand.write_text(code)
-
-bestand.name
