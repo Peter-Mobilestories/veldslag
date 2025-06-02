@@ -1,97 +1,137 @@
 import streamlit as st
-import random
+import time
 
-# --- Pagina-instellingen ---
 st.set_page_config(page_title="De Slag om Slot Haneburg", page_icon="🏰")
 
-# --- Middeleeuwse styling met CSS ---
-st.markdown("""
-    <style>
-    /* Achtergrondkleur (perkamentachtig) */
-    .stApp {
-        background-color: #f8f1da;
-        color: #3e2d1c;
-    }
+if 'gevonden_vakken' not in st.session_state:
+    st.session_state.gevonden_vakken = []
+if 'gevonden_troepen' not in st.session_state:
+    st.session_state.gevonden_troepen = []
+if 'gegeven_adressen' not in st.session_state:
+    st.session_state.gegeven_adressen = []
+if 'wacht_tot' not in st.session_state:
+    st.session_state.wacht_tot = 0
 
-    /* Middeleeuws lettertype */
-    @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English&display=swap');
-
-    html, body, [class*="css"] {
-        font-family: 'IM Fell English', serif;
-    }
-
-    /* Titel opmaak */
-    h1 {
-        text-align: center;
-        font-size: 3em;
-        color: #4a2e0f;
-        text-shadow: 1px 1px #d2b48c;
-        margin-bottom: 0.5em;
-    }
-
-    /* Vraagbox styling */
-    .vraagbox {
-        background-color: rgba(255, 255, 255, 0.75);
-        padding: 1.2em;
-        border-radius: 10px;
-        border: 2px solid #5b3c1e;
-        box-shadow: 4px 4px 12px rgba(0,0,0,0.2);
-    }
-
-    /* Hintbox styling */
-    .hintbox {
-        background-color: #f2e4ca;
-        padding: 0.7em;
-        border-left: 5px solid #9c6d3c;
-        margin-top: 1em;
-        font-style: italic;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- Titel & inleiding ---
-st.title("🏰 De Slag om Slot Haneburg")
-
-st.markdown("""
-In het **Jaar des Hoenders 1284** trekken de edele Chickkies ten strijde tegen de duistere machten van Drakenrust. 
-Verken het slagveld, beantwoord raadselachtige vragen, en ontdek waar de kroon verborgen ligt...  
-""")
-
-# --- Vragen en logica ---
-vragen = [
-    {"coord": "A1", "vraag": "Welke fabelachtige draak heeft meerdere hoofden?", "antwoord": "Hydra"},
-    {"coord": "B2", "vraag": "Wat droeg een ridderes tijdens een magisch duel?", "antwoord": "Spreukmantel"},
-    {"coord": "C3", "vraag": "Hoeveel poten heeft een kip?", "antwoord": "2"},
-    {"coord": "D4", "vraag": "Wat kraait 's ochtends en denkt dat hij de zon oproept?", "antwoord": "Haan"},
-    {"coord": "E5", "vraag": "Hoe noemt men het zwaard van een edele krijgster?", "antwoord": "Lichtbrenger"},
+troepen = [
+    ['E3', 'E4', 'E5', 'E6'],
+    ['F1', 'F2'],
+    ['B5', 'B6'],
+    ['A3', 'B3', 'C3']
 ]
 
-geraakt_vakken = ["A1", "C3", "E5"]
-bezochte_vakken = []
+adressen = [
+    ("Esso het Anker", "A2, 6121 PE Born"),
+    ("Tankpool 24", "Eijsden Knuvelkes, 6245 LZ Eijsden"),
+    ("E40 Aire de Tignee Sud", "4632 Soumagne, België"),
+    ("Rue du Parc 2", "4950 Waimes, België")
+]
 
-# --- Interactieveld ---
-st.markdown("### 🔍 Kies uw veld, edele zuster:")
-vak = st.text_input("📍 Voer een veld in (bijv. B2):").upper().strip()
+vraag_data = {
+    "A1": {"type": "opdracht", "tekst": "Maak een katapult van elastiek en lepels en schiet een marshmallow.", "codewoord": "kelk"},
+    "A2": {"type": "vraag", "tekst": "Wat was de taak van een hofnar?\nA) De koning verdedigen\nB) Grappen maken en de koning vermaken\nC) Het kasteel schoonmaken", "antwoord": "B"},
+    "A3": {"type": "opdracht", "tekst": "Vorm samen een menselijk schild.", "codewoord": "rondetafel"},
+    "A4": {"type": "opdracht", "tekst": "Verzin een monster dat jullie onderweg tegenkomen en beschrijf hoe jullie het verslaan.", "codewoord": "Draak"},
+    "A5": {"type": "opdracht", "tekst": "Spreek 1 minuut als een dronken nar.", "codewoord": "Jeanne"},
+    "A6": {"type": "opdracht", "tekst": "Doe een zwaardgevecht met onzichtbare wapens in slow motion.", "codewoord": "Prinseserwt"},
+    "B1": {"type": "vraag", "tekst": "Wat was de functie van een donjon in een kasteel?\nA) Wijnkelder\nB) Hoofdtoren/verdediging\nC) Feestzaal", "antwoord": "B"},
+    "B2": {"type": "opdracht", "tekst": "Maak een vlag voor jouw team.", "codewoord": "Joris"},
+    "B3": {"type": "vraag", "tekst": "Wat droeg een ridder als bescherming (6 letters)?", "antwoord": "harnas"},
+    "B4": {"type": "opdracht", "tekst": "Als jij koning(in) was, wat zou je eerste wet zijn? Deze wet moet je team het hele weekend volgen.", "codewoord": "hofnar"},
+    "B5": {"type": "consequentie", "tekst": "Je loopt in een hinderlaag van de tegenpartij: je mag gedurende twee minuten geen nieuwe locaties aanvallen.", "wacht": 120},
+    "B6": {"type": "opdracht", "tekst": "Voer een middeleeuwse ridderceremonie uit en sla iemand tot ridder met een tak.", "codewoord": "hekserij"},
+    "C1": {"type": "vraag", "tekst": "Wat is een banier?\nA) Een paard\nB) Een strijdkreet\nC) Een vlag met een symbool van een ridder of familie", "antwoord": "C"},
+    "C2": {"type": "opdracht", "tekst": "Vertel in 20 seconden het verhaal van je eerste drakengevecht.", "codewoord": ""},
+    "C3": {"type": "consequentie", "tekst": "De rivier is te diep – je kunt er niet doorheen. Je loopt 2 minuten vertraging op.", "wacht": 120},
+    "C4": {"type": "opdracht", "tekst": "Voer een zwaardgevecht met dropveters in slow motion.", "codewoord": "slot"},
+    "C5": {"type": "consequentie", "tekst": "Je leger verdwaalt in het moeras – je mag 3 minuten geen nieuwe locatie aanvallen.", "wacht": 180},
+    "C6": {"type": "opdracht", "tekst": "Maak een kasteel van wat je om je heen vindt.", "codewoord": ""},
+    "D1": {"type": "opdracht", "tekst": "Bedenk een toverspreuk van 4 woorden en gebruik hem met beweging.", "codewoord": ""},
+    "D2": {"type": "consequentie", "tekst": "Je moet je terugtrekken – je mag gedurende twee minuten geen nieuwe locatie aanvallen.", "wacht": 120},
+    "D3": {"type": "vraag", "tekst": "Lang steekwapen, vaak gebruikt op paarden (4 letters)", "antwoord": "lans"},
+    "D4": {"type": "consequentie", "tekst": "Je hebt het rantsoen van de tegenpartij gevonden – ga direct door naar de volgende locatie.", "wacht": 0},
+    "D5": {"type": "vraag", "tekst": "Wat was een heraut?\nA) Een kok\nB) Een boodschapper die aankondigingen deed\nC) Een soldaat", "antwoord": "B"},
+    "D6": {"type": "opdracht", "tekst": "Maak een schild.", "codewoord": "prins"},
+    "E1": {"type": "opdracht", "tekst": "Kruipend naar het slagveld: kruip 15 meter over het gras alsof je gewond bent in de strijd.", "codewoord": "pijlenboog"},
+    "E2": {"type": "vraag", "tekst": "Wat is een pelgrim?\nA) Iemand die op reis ging om religieuze redenen\nB) Een roofridder\nC) Een koopman met kamelen", "antwoord": "A"},
+    "E3": {"type": "vraag", "tekst": "Vuurspuwend wezen in veel sagen (5 letters)", "antwoord": "draak"},
+    "E4": {"type": "vraag", "tekst": "Welke taal werd vaak gebruikt in officiële documenten in de middeleeuwen?\nA) Frans\nB) Nederlands\nC) Latijn", "antwoord": "C"},
+    "E5": {"type": "opdracht", "tekst": "Verzin een middeleeuwse bijnaam voor al je groepsleden.", "codewoord": "schild"},
+    "E6": {"type": "opdracht", "tekst": "Maak een helm van aluminiumfolie.", "codewoord": "veldslag"},
+    "F1": {"type": "consequentie", "tekst": "Je wapens zijn verdwenen; bij de volgende opdracht moeten jullie alles met alleen je linkerhand doen.", "wacht": 0},
+    "F2": {"type": "consequentie", "tekst": "Herhaal je eerder bedachte eerste wet als koning(in). Die geldt nog steeds!", "wacht": 0},
+    "F3": {"type": "consequentie", "tekst": "Je ontvangt een geheime kaart van een bevriende spion – je hoeft geen opdracht te doen.", "wacht": 0},
+    "F4": {"type": "vraag", "tekst": "Wat is de functie van een banier?", "antwoord": "vlag met symbool van een ridder of familie"},
+    "F5": {"type": "consequentie", "tekst": "Je ontvangt een geheime kaart van een bevriende spion – je hoeft geen opdracht te doen.", "wacht": 0},
+    "F6": {"type": "consequentie", "tekst": "De brug is ingestort! Wacht 1 minuut voordat je een volgende locatie betreedt.", "wacht": 60}
+}
+
+# --- UI ---
+st.title("🏰 De Slag om Slot Haneburg")
+st.markdown("Voer een veld in (bijv. A1-F6):")
+vak = st.text_input("📍 Veld").upper().strip()
+
+nu = time.time()
+if st.session_state.wacht_tot > nu:
+    resterend = int(st.session_state.wacht_tot - nu)
+    st.warning(f"⏳ Je moet nog {resterend} seconden wachten voordat je verder mag.")
+    st.stop()
 
 if vak:
-    vraag_data = next((v for v in vragen if v["coord"] == vak), None)
-    if vraag_data:
-        if vak in bezochte_vakken:
-            st.warning("⚠️ Dit veld werd reeds onderzocht, waarde krijgster.")
-        else:
-            with st.container():
-                st.markdown(f"<div class='vraagbox'><b>📜 Vraag:</b><br>{vraag_data['vraag']}</div>", unsafe_allow_html=True)
-                antwoord = st.text_input("✒️ Uw antwoord:", key=vak)
-                if antwoord:
-                    if antwoord.strip().lower() == vraag_data["antwoord"].lower():
-                        st.success("✅ Juist beantwoord, wijze zuster!")
-                        if vak in geraakt_vakken:
-                            st.markdown("<div class='hintbox'>🔥 Geraakt! Een vijandelijke eenheid werd verslagen!</div>", unsafe_allow_html=True)
-                            st.markdown("<div class='hintbox'>🧭 Hint: Men fluistert dat de kroon zich westelijk van rij F bevindt…</div>", unsafe_allow_html=True)
-                        else:
-                            st.info("📜 Geen vijand hier, slechts kippenveren en modder...")
-                        bezochte_vakken.append(vak)
-                    else:
-                        st.error("❌ Helaas, dat is niet wat de oude kronieken vermelden.")
+    if vak in st.session_state.gevonden_vakken:
+        st.info("Dit veld is al onderzocht.")
+    elif vak not in vraag_data:
+        st.error("Onbekend veld.")
     else:
-        st.error("⛔ Dit veld komt niet voor in de kronieken van Haneburg.")
+        item = vraag_data[vak]
+        st.markdown(f"### 📜 Opdracht bij {vak}:")
+        st.write(item['tekst'])
+
+        if item['type'] == 'vraag':
+            antwoord = st.text_input("Jouw antwoord:")
+            if antwoord:
+                if antwoord.strip().lower() == item['antwoord'].lower():
+                    st.success("Correct beantwoord!")
+                    st.session_state.gevonden_vakken.append(vak)
+                else:
+                    st.error("Helaas, dat is onjuist.")
+
+        elif item['type'] == 'opdracht':
+            codewoord = st.text_input("Voer het codewoord in dat je van de spelbegeleider kreeg:")
+            if codewoord:
+                if codewoord.strip().lower() == item['codewoord'].lower():
+                    st.success("Juist codewoord!")
+                    st.session_state.gevonden_vakken.append(vak)
+                else:
+                    st.error("Onjuist codewoord.")
+
+        elif item['type'] == 'consequentie':
+            wachttijd = item.get('wacht', 60)
+            st.warning(f"⏳ {item['tekst']}")
+            st.session_state.wacht_tot = time.time() + wachttijd
+            st.stop()
+
+        geraakt = False
+        for troep in troepen:
+            if vak in troep:
+                st.success("🔥 RAAK!")
+                geraakt = True
+                troep_id = tuple(troep)
+                if all(v in st.session_state.gevonden_vakken for v in troep):
+                    if troep_id not in st.session_state.gevonden_troepen:
+                        idx = len(st.session_state.gevonden_troepen)
+                        if idx < len(adressen):
+                            st.balloons()
+                            naam, adres = adressen[idx]
+                            st.success(f"🏁 Troepenmacht vernietigd! Hintlocatie {idx+1}: **{naam}**, {adres}")
+                            st.session_state.gevonden_troepen.append(troep_id)
+                            st.session_state.gegeven_adressen.append(adres)
+                break
+        if not geraakt:
+            st.info("MIS!")
+
+st.markdown("---")
+st.markdown(f"### 📜 Gevonden vakken: {', '.join(st.session_state.gevonden_vakken)}")
+st.markdown(f"### 🎯 Troepenmachten uitgeschakeld: {len(st.session_state.gevonden_troepen)}")
+st.markdown(f"### 🗺️ Hints ontvangen:")
+for i, adres in enumerate(st.session_state.gegeven_adressen):
+    st.write(f"{i+1}. {adres}")
